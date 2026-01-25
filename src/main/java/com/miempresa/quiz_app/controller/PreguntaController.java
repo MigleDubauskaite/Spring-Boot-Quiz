@@ -48,6 +48,12 @@ public class PreguntaController {
     public Pregunta guardarPregunta(@RequestBody Pregunta pregunta) {
         return preguntaService.guardarPregunta(pregunta);
     }
+    
+    @PutMapping("/{id}")
+    public Pregunta actualizarPregunta(@PathVariable String id, @RequestBody Pregunta pregunta) {
+        pregunta.setId(id);
+        return preguntaService.guardarPregunta(pregunta);
+    }
 
     // Eliminar una pregunta por ID
     @DeleteMapping("/{id}")
