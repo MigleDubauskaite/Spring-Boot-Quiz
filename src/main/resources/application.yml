@@ -1,0 +1,23 @@
+# ==========================
+# Configuración de bases de datos
+# ==========================
+spring:
+  # ---------- MySQL ----------
+  datasource:
+    url: jdbc:mysql://localhost:3306/preguntas_db?allowPublicKeyRetrieval=true&useSSL=false
+    username: springuser
+    password: spring123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ---------- MongoDB ----------
+  data:
+    mongodb:
+      uri: mongodb://admin:admin123@localhost:27017/preguntas_mongo_db?authSource=admin

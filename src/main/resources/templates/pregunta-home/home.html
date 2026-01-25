@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz App</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <h1 th:text="${mensaje}">Mensaje de bienvenida</h1>
+
+    <p>Selecciona una categoría para comenzar a jugar:</p>
+
+    <ul>
+        <li><a href="#">Programación</a></li>
+        <li><a href="#">Desarrollo Web</a></li>
+        <li><a href="#">Bases de Datos</a></li>
+    </ul>
+</body>
+</html>

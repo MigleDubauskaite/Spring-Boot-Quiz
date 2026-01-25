@@ -1,0 +1,82 @@
+[
+  {
+    "enunciado": "Java es un lenguaje de programación orientado a objetos.",
+    "tipo": "VF",
+    "categoria": "Programación",
+    "dificultad": "Fácil",
+    "opciones": ["Verdadero", "Falso"],
+    "respuestas": ["Verdadero"]
+  },
+  {
+    "enunciado": "MongoDB es una base de datos relacional.",
+    "tipo": "VF",
+    "categoria": "Bases de datos",
+    "dificultad": "Fácil",
+    "opciones": ["Verdadero", "Falso"],
+    "respuestas": ["Falso"]
+  },
+  {
+    "enunciado": "¿Cuál es el símbolo de Java?",
+    "tipo": "UNICA",
+    "categoria": "Programación",
+    "dificultad": "Media",
+    "opciones": ["☕", "🐍", "🐘"],
+    "respuestas": ["☕"]
+  },
+  {
+    "enunciado": "¿Cuál de estas es una base de datos NoSQL?",
+    "tipo": "UNICA",
+    "categoria": "Bases de datos",
+    "dificultad": "Media",
+    "opciones": ["MongoDB", "MySQL", "Oracle"],
+    "respuestas": ["MongoDB"]
+  },
+  {
+    "enunciado": "Selecciona los lenguajes de programación orientados a objetos.",
+    "tipo": "MULTIPLE",
+    "categoria": "Programación",
+    "dificultad": "Difícil",
+    "opciones": ["Java", "Python", "HTML", "CSS"],
+    "respuestas": ["Java", "Python"]
+  },
+  {
+    "enunciado": "Selecciona las bases de datos NoSQL.",
+    "tipo": "MULTIPLE",
+    "categoria": "Bases de datos",
+    "dificultad": "Difícil",
+    "opciones": ["MongoDB", "Cassandra", "MySQL", "PostgreSQL"],
+    "respuestas": ["MongoDB", "Cassandra"]
+  },
+  {
+    "enunciado": "Python es un lenguaje interpretado.",
+    "tipo": "VF",
+    "categoria": "Programación",
+    "dificultad": "Fácil",
+    "opciones": ["Verdadero", "Falso"],
+    "respuestas": ["Verdadero"]
+  },
+  {
+    "enunciado": "HTML es un lenguaje de programación.",
+    "tipo": "VF",
+    "categoria": "Desarrollo Web",
+    "dificultad": "Fácil",
+    "opciones": ["Verdadero", "Falso"],
+    "respuestas": ["Falso"]
+  },
+  {
+    "enunciado": "¿Cuál de estos lenguajes es funcional?",
+    "tipo": "UNICA",
+    "categoria": "Programación",
+    "dificultad": "Difícil",
+    "opciones": ["Java", "Haskell", "C#"],
+    "respuestas": ["Haskell"]
+  },
+  {
+    "enunciado": "Selecciona los frameworks de Java.",
+    "tipo": "MULTIPLE",
+    "categoria": "Desarrollo",
+    "dificultad": "Media",
+    "opciones": ["Spring", "Django", "Hibernate", "Rails"],
+    "respuestas": ["Spring", "Hibernate"]
+  }
+]
