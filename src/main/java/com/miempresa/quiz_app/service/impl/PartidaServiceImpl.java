@@ -1,7 +1,9 @@
-package com.miempresa.quiz_app.service;
+package com.miempresa.quiz_app.service.impl;
 
 import com.miempresa.quiz_app.model.mysql.entity.Partida;
 import com.miempresa.quiz_app.repository.mysql.PartidaRepository;
+import com.miempresa.quiz_app.service.PartidaService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;

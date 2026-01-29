@@ -1,7 +1,7 @@
-package com.miempresa.quiz_app.controller;
+package com.miempresa.quiz_app.controller.api;
 
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
-import com.miempresa.quiz_app.service.PreguntaServiceImpl;
+import com.miempresa.quiz_app.service.impl.PreguntaServiceImpl;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/preguntas")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PreguntaController {
 
     private final PreguntaServiceImpl preguntaService;

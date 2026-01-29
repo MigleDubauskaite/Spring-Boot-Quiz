@@ -1,7 +1,8 @@
-package com.miempresa.quiz_app.service;
+package com.miempresa.quiz_app.service.impl;
 
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
 import com.miempresa.quiz_app.repository.mongo.PreguntaRepository;
+import com.miempresa.quiz_app.service.PreguntaService;
 
 import org.springframework.stereotype.Service;
 

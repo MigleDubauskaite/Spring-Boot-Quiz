@@ -10,9 +10,11 @@ public interface JuegoService {
 
     Jugador crearJugadorAnonimo(String nombre);
 
-    List<Pregunta> generarPreguntas(String categoria, String tipo, int cantidad);
+    List<Pregunta> generarPreguntas(List<String> categorias, 
+			List<Pregunta.TipoPregunta> tipos, int cantidad);
 
-    Partida iniciarPartida(Jugador jugador, String categoria, String tipo, int cantidad);
+    Partida iniciarPartida(Jugador jugador, List<String> categorias, 
+			List<Pregunta.TipoPregunta> tipos, int cantidad);
 
     void registrarRespuesta(Partida partida, boolean correcta);
 }

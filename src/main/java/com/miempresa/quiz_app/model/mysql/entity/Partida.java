@@ -2,6 +2,9 @@ package com.miempresa.quiz_app.model.mysql.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.miempresa.quiz_app.model.mongo.document.Pregunta;
 
 @Entity
 @Table(name = "partidas")
@@ -18,8 +21,8 @@ public class Partida {
     private int totalPreguntas;
     private int aciertos;
 
-    private String categoria;
-    private String tipoPregunta;
+    private List<String> categorias; 
+	private	List<Pregunta.TipoPregunta> tipos;
 
     private LocalDateTime fecha;
 
@@ -27,18 +30,58 @@ public class Partida {
         this.fecha = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public Jugador getJugador() { return jugador; }
-    public int getTotalPreguntas() { return totalPreguntas; }
-    public int getAciertos() { return aciertos; }
-    public String getCategoria() { return categoria; }
-    public String getTipoPregunta() { return tipoPregunta; }
-    public LocalDateTime getFecha() { return fecha; }
+	public Long getId() {
+		return id;
+	}
 
-    public void setJugador(Jugador jugador) { this.jugador = jugador; }
-    public void setTotalPreguntas(int totalPreguntas) { this.totalPreguntas = totalPreguntas; }
-    public void setAciertos(int aciertos) { this.aciertos = aciertos; }
-    public void setCategoria(String categoria) { this.categoria = categoria; }
-    public void setTipoPregunta(String tipoPregunta) { this.tipoPregunta = tipoPregunta; }
-    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+
+	public Jugador getJugador() {
+		return jugador;
+	}
+
+	public void setJugador(Jugador jugador) {
+		this.jugador = jugador;
+	}
+
+	public int getTotalPreguntas() {
+		return totalPreguntas;
+	}
+
+	public void setTotalPreguntas(int totalPreguntas) {
+		this.totalPreguntas = totalPreguntas;
+	}
+
+	public int getAciertos() {
+		return aciertos;
+	}
+
+	public void setAciertos(int aciertos) {
+		this.aciertos = aciertos;
+	}
+
+	public List<String> getCategorias() {
+		return categorias;
+	}
+
+	public void setCategorias(List<String> categorias) {
+		this.categorias = categorias;
+	}
+
+	public List<Pregunta.TipoPregunta> getTipos() {
+		return tipos;
+	}
+
+	public void setTipos(List<Pregunta.TipoPregunta> tipos) {
+		this.tipos = tipos;
+	}
+
+	public LocalDateTime getFecha() {
+		return fecha;
+	}
+
+	public void setFecha(LocalDateTime fecha) {
+		this.fecha = fecha;
+	}
+
+    
 }
