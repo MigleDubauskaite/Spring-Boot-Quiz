@@ -1,20 +1,18 @@
 package com.miempresa.quiz_app.service;
 
+import com.miempresa.quiz_app.dto.*;
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
-import com.miempresa.quiz_app.model.mysql.entity.Jugador;
-import com.miempresa.quiz_app.model.mysql.entity.Partida;
-
 import java.util.List;
 
 public interface JuegoService {
-
-    Jugador crearJugadorAnonimo(String nombre);
-
-    List<Pregunta> generarPreguntas(List<String> categorias, 
-			List<Pregunta.TipoPregunta> tipos, int cantidad);
-
-    Partida iniciarPartida(Jugador jugador, List<String> categorias, 
-			List<Pregunta.TipoPregunta> tipos, int cantidad);
-
-    void registrarRespuesta(Partida partida, boolean correcta);
+    OpcionesQuizDTO obtenerOpcionesDisponibles();
+    
+    PartidaResponse iniciarPartida(Long jugadorId, String nombre, 
+                                          List<String> categorias, 
+                                          List<Pregunta.TipoPregunta> tipos, 
+                                          int cantidad);
+                                          
+    PartidaResponse obtenerPartidaConPreguntas(Long partidaId);
+    
+    RespuestaResultadoDTO registrarRespuesta(Long partidaId, String preguntaId, List<String> respuestasUsuario);
 }

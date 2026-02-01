@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/preguntas")
-@CrossOrigin(origins = "http://localhost:5173")
 public class PreguntaController {
 
     private final PreguntaServiceImpl preguntaService;

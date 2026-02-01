@@ -2,6 +2,7 @@ package com.miempresa.quiz_app.model.mysql.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
@@ -20,68 +21,57 @@ public class Partida {
 
     private int totalPreguntas;
     private int aciertos;
+    private int puntos;                          // ← NUEVO: puntaje acumulado
 
-    private List<String> categorias; 
-	private	List<Pregunta.TipoPregunta> tipos;
+    @ElementCollection
+    @CollectionTable(name = "partida_categorias", joinColumns = @JoinColumn(name = "partida_id"))
+    @Column(name = "categoria")
+    private List<String> categorias = new ArrayList<>();
+    
+    @ElementCollection
+    @Enumerated(EnumType.STRING) // Importante para guardar el texto del Enum y no el índice
+    @CollectionTable(name = "partida_tipos", joinColumns = @JoinColumn(name = "partida_id"))
+    @Column(name = "tipo")
+    private List<Pregunta.TipoPregunta> tipos = new ArrayList<>();
+
+    @ElementCollection                           // ← NUEVO: IDs de preguntas de MongoDB
+    @CollectionTable(name = "partida_preguntas", joinColumns = @JoinColumn(name = "partida_id"))
+    @Column(name = "pregunta_id")
+    private List<String> preguntaIds;
 
     private LocalDateTime fecha;
 
     public Partida() {
         this.fecha = LocalDateTime.now();
+        this.puntos = 0;
+        this.aciertos = 0;
     }
 
-	public Long getId() {
-		return id;
-	}
+    // Getters y setters existentes...
+    public Long getId() { return id; }
 
+    public Jugador getJugador() { return jugador; }
+    public void setJugador(Jugador jugador) { this.jugador = jugador; }
 
-	public Jugador getJugador() {
-		return jugador;
-	}
+    public int getTotalPreguntas() { return totalPreguntas; }
+    public void setTotalPreguntas(int totalPreguntas) { this.totalPreguntas = totalPreguntas; }
 
-	public void setJugador(Jugador jugador) {
-		this.jugador = jugador;
-	}
+    public int getAciertos() { return aciertos; }
+    public void setAciertos(int aciertos) { this.aciertos = aciertos; }
 
-	public int getTotalPreguntas() {
-		return totalPreguntas;
-	}
+    public List<String> getCategorias() { return categorias; }
+    public void setCategorias(List<String> categorias) { this.categorias = categorias; }
 
-	public void setTotalPreguntas(int totalPreguntas) {
-		this.totalPreguntas = totalPreguntas;
-	}
+    public List<Pregunta.TipoPregunta> getTipos() { return tipos; }
+    public void setTipos(List<Pregunta.TipoPregunta> tipos) { this.tipos = tipos; }
 
-	public int getAciertos() {
-		return aciertos;
-	}
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
-	public void setAciertos(int aciertos) {
-		this.aciertos = aciertos;
-	}
+    // Nuevos getters y setters
+    public int getPuntos() { return puntos; }
+    public void setPuntos(int puntos) { this.puntos = puntos; }
 
-	public List<String> getCategorias() {
-		return categorias;
-	}
-
-	public void setCategorias(List<String> categorias) {
-		this.categorias = categorias;
-	}
-
-	public List<Pregunta.TipoPregunta> getTipos() {
-		return tipos;
-	}
-
-	public void setTipos(List<Pregunta.TipoPregunta> tipos) {
-		this.tipos = tipos;
-	}
-
-	public LocalDateTime getFecha() {
-		return fecha;
-	}
-
-	public void setFecha(LocalDateTime fecha) {
-		this.fecha = fecha;
-	}
-
-    
+    public List<String> getPreguntaIds() { return preguntaIds; }
+    public void setPreguntaIds(List<String> preguntaIds) { this.preguntaIds = preguntaIds; }
 }

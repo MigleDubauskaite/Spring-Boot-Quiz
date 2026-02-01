@@ -12,5 +12,4 @@ public interface PreguntaRepository extends MongoRepository<Pregunta, String> {
 
     List<Pregunta> findByCategoria(String categoria);
     List<Pregunta> findByTipo(Pregunta.TipoPregunta tipo);
-    List<Pregunta> findByDificultad(String dificultad);
 }

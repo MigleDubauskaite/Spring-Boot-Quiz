@@ -9,11 +9,13 @@ public interface PartidaService {
 
     Partida guardar(Partida partida);
 
-    Optional<Partida> obtenerPorId(Long id);
+    Optional<Partida> getById(Long id);
 
     List<Partida> obtenerRankingTop10();
 
     List<Partida> obtenerPorJugador(Long jugadorId);
 
     Partida actualizar(Partida partida);
+    
 }
+

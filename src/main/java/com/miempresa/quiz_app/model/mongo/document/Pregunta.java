@@ -13,9 +13,9 @@ public class Pregunta {
     private String enunciado;
     private TipoPregunta tipo;
     private String categoria;
-    private String dificultad;
     private List<String> opciones;
     private List<String> respuestas;
+    private List<String> respuestasCorrectas;
 
     public enum TipoPregunta {
         VF, UNICA, MULTIPLE
@@ -30,10 +30,10 @@ public class Pregunta {
     public void setTipo(TipoPregunta tipo) { this.tipo = tipo; }
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
-    public String getDificultad() { return dificultad; }
-    public void setDificultad(String dificultad) { this.dificultad = dificultad; }
     public List<String> getOpciones() { return opciones; }
     public void setOpciones(List<String> opciones) { this.opciones = opciones; }
     public List<String> getRespuestas() { return respuestas; }
     public void setRespuestas(List<String> respuestas) { this.respuestas = respuestas; }
+    public List<String> getRespuestasCorrectas() { return respuestasCorrectas; }
+    public void setRespuestasCorrectas(List<String> respuestasCorrectas) { this.respuestasCorrectas = respuestasCorrectas; }
 }
