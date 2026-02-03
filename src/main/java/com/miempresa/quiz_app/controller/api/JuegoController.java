@@ -15,39 +15,36 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/juego")
 public class JuegoController {
 
-    @Autowired
-    private JuegoService juegoService;
+	@Autowired
+	private JuegoService juegoService;
 
-    // 1. Obtener partida con preguntas (React lo usa al cargar)
-    @GetMapping("/partida/{id}")
-    public ResponseEntity<PartidaResponse> obtenerPartida(@PathVariable Long id) {
-        try {
-            PartidaResponse partida = juegoService.obtenerPartidaConPreguntas(id);
-            
-            if (partida == null) {
-                return ResponseEntity.notFound().build();
-            }
-            
-            return ResponseEntity.ok(partida);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+	// 1. Obtener partida con preguntas (React lo usa al cargar)
+	@GetMapping("/partida/{id}")
+	public ResponseEntity<PartidaResponse> obtenerPartida(@PathVariable Long id) {
+		try {
+			PartidaResponse partida = juegoService.obtenerPartidaConPreguntas(id);
 
-    // 2. Registrar respuesta del usuario
-    @PostMapping("/answer")
-    public ResponseEntity<RespuestaResultadoDTO> responder(@RequestBody RespuestaRequest request) {
-        try {
-            RespuestaResultadoDTO resultado = juegoService.registrarRespuesta(
-                request.partidaId(),
-                request.preguntaId(),
-                request.respuestasUsuario()
-            );
-            return ResponseEntity.ok(resultado);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+			if (partida == null) {
+				return ResponseEntity.notFound().build();
+			}
+
+			return ResponseEntity.ok(partida);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	// 2. Registrar respuesta del usuario
+	@PostMapping("/answer")
+	public ResponseEntity<RespuestaResultadoDTO> responder(@RequestBody RespuestaRequest request) {
+		try {
+			RespuestaResultadoDTO resultado = juegoService.registrarRespuesta(request.partidaId(), request.preguntaId(),
+					request.respuestasUsuario());
+			return ResponseEntity.ok(resultado);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().build();
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
 }

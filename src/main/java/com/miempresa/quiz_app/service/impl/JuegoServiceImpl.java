@@ -8,121 +8,197 @@ import com.miempresa.quiz_app.repository.mongo.PreguntaRepository;
 import com.miempresa.quiz_app.repository.mysql.JugadorRepository;
 import com.miempresa.quiz_app.repository.mysql.PartidaRepository;
 import com.miempresa.quiz_app.service.JuegoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class JuegoServiceImpl implements JuegoService {
 
-    @Autowired private MongoTemplate mongoTemplate;
-    @Autowired private PreguntaRepository preguntaRepo;
-    @Autowired private JugadorRepository jugadorRepo;
-    @Autowired private PartidaRepository partidaRepo;
+    private final PreguntaRepository preguntaRepo;
+    private final PartidaRepository partidaRepo;
+    private final JugadorRepository jugadorRepo;
+
+    public JuegoServiceImpl(PreguntaRepository preguntaRepo,
+                            PartidaRepository partidaRepo,
+                            JugadorRepository jugadorRepo) {
+        this.preguntaRepo = preguntaRepo;
+        this.partidaRepo = partidaRepo;
+        this.jugadorRepo = jugadorRepo;
+    }
+
+    // =====================================================
+    // OPCIONES DEL QUIZ (HOME - THYMELEAF)
+    // =====================================================
 
     @Override
     public OpcionesQuizDTO obtenerOpcionesDisponibles() {
-        List<String> categorias = mongoTemplate.findDistinct("categoria", Pregunta.class, String.class);
+        List<String> categorias = preguntaRepo.findCategorias().stream()
+                .map(Pregunta::getCategoria)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
         List<Pregunta.TipoPregunta> tipos = Arrays.asList(Pregunta.TipoPregunta.values());
-        return new OpcionesQuizDTO(categorias, tipos, 20);
+        
+        // Lógica de negocio: Opciones reales de cantidad
+        List<Integer> opcionesCantidad = List.of(10, 15, 20);
+
+        return new OpcionesQuizDTO(categorias, tipos, opcionesCantidad);
     }
 
+    // =====================================================
+    // INICIO DE PARTIDA
+    // =====================================================
+
     @Override
-    public PartidaResponse iniciarPartida(Long jugadorId, String nombre, List<String> cats, List<Pregunta.TipoPregunta> tipos, int cant) {
-        // 1. Lógica de Jugador: Buscar por ID -> Buscar por Nombre -> Crear nuevo
+    @Transactional
+    public PartidaResponse iniciarPartida(Long jugadorId, String nombre, List<String> categorias, 
+                                         List<String> tiposStr, Integer cantidadSeleccionada) {
+
+        validarNombre(nombre);
+
+        // Lógica de negocio: Cantidad por defecto (10) si no es válida
+        List<Integer> opcionesPermitidas = List.of(10, 15, 20);
+        int cantidadFinal = (cantidadSeleccionada != null && opcionesPermitidas.contains(cantidadSeleccionada))
+                ? cantidadSeleccionada
+                : 10;
+
+        // Gestionar jugador (Recuperar o Crear)
         Jugador jugador = gestionarJugador(jugadorId, nombre);
 
-        // 2. Obtener Preguntas filtradas y mezcladas
-        List<Pregunta> seleccionadas = obtenerPreguntasFiltradas(cats, tipos, cant);
+        // Convertir filtros y obtener preguntas
+        List<Pregunta.TipoPregunta> tipos = convertirTiposStringAEnum(tiposStr);
+        List<Pregunta> preguntas = obtenerPreguntasFiltradas(categorias, tipos, cantidadFinal);
 
-        // 3. Crear y guardar Partida
+        if (preguntas.isEmpty()) {
+            throw new RuntimeException("No hay preguntas disponibles para los filtros seleccionados.");
+        }
+
+        // Crear Entidad Partida
         Partida partida = new Partida();
         partida.setJugador(jugador);
-        partida.setTotalPreguntas(seleccionadas.size());
-        partida.setCategorias(cats);
+        partida.setTotalPreguntas(preguntas.size());
+        partida.setCategorias(categorias);
         partida.setTipos(tipos);
-        partida.setPreguntaIds(seleccionadas.stream().map(Pregunta::getId).toList());
-        partida = partidaRepo.save(partida);
+        partida.setAciertos(0);
+        partida.setPuntos(0);
+        // Guardamos solo los IDs de MongoDB en la base de datos relacional
+        partida.setPreguntaIds(preguntas.stream().map(Pregunta::getId).toList());
 
-        return new PartidaResponse(
-                partida.getId(), 
-                jugador.getId(), 
-                jugador.getNombre(), 
-                0,                          // <-- Aciertos iniciales
-                partida.getTotalPreguntas(), 
-                seleccionadas.stream().map(PreguntaDTO::new).toList()
-            );
-    }
+        partidaRepo.save(partida);
 
-    @Override
-    public PartidaResponse obtenerPartidaConPreguntas(Long partidaId) {
-        Partida partida = partidaRepo.findById(partidaId)
-                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
-        
-        List<Pregunta> preguntas = (List<Pregunta>) preguntaRepo.findAllById(partida.getPreguntaIds());
-        
+        // Retornar DTO (Mapeo manual para mantener DTO mudo)
         return new PartidaResponse(
-            partida.getId(), 
-            partida.getJugador().getId(), 
-            partida.getJugador().getNombre(),
-            partida.getAciertos(), 
-            partida.getTotalPreguntas(), 
-            preguntas.stream().map(PreguntaDTO::new).toList()
+                partida.getId(),
+                jugador.getId(),
+                jugador.getNombre(),
+                partida.getAciertos(),
+                partida.getTotalPreguntas(),
+                preguntas.stream().map(PreguntaDTO::new).toList()
         );
     }
 
+    // =====================================================
+    // REGISTRO DE RESPUESTAS
+    // =====================================================
+
     @Override
+    @Transactional
     public RespuestaResultadoDTO registrarRespuesta(Long partidaId, String preguntaId, List<String> respuestasUsuario) {
-        Partida partida = partidaRepo.findById(partidaId).orElseThrow();
-        Pregunta pregunta = preguntaRepo.findById(preguntaId).orElseThrow();
+        
+        Partida partida = partidaRepo.findById(partidaId)
+                .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
+        
+        Pregunta pregunta = preguntaRepo.findById(preguntaId)
+                .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
 
-        // Comparación de listas: deben tener mismo tamaño y mismos elementos
-        boolean esCorrecta = respuestasUsuario != null && pregunta.getRespuestasCorrectas().size() == respuestasUsuario.size() 
-                             && respuestasUsuario.containsAll(pregunta.getRespuestasCorrectas());
+        // Lógica de corrección (independiente del orden)
+        List<String> correctas = pregunta.getRespuestasCorrectas();
+        boolean esCorrecta = correctas.size() == respuestasUsuario.size() &&
+                             new HashSet<>(correctas).equals(new HashSet<>(respuestasUsuario));
 
+        int puntosObtenidos = 0;
         if (esCorrecta) {
+            puntosObtenidos = 10;
             partida.setAciertos(partida.getAciertos() + 1);
-            partida.setPuntos(partida.getPuntos() + 10); // Puntos fijos
+            partida.setPuntos(partida.getPuntos() + puntosObtenidos);
             partidaRepo.save(partida);
         }
 
         return new RespuestaResultadoDTO(
-            esCorrecta, 
-            pregunta.getRespuestasCorrectas(), 
-            esCorrecta ? 10 : 0, 
-            partida.getPuntos(), 
-            partida.getAciertos(), 
-            partida.getTotalPreguntas(), 
-            false
+                esCorrecta,
+                correctas,
+                puntosObtenidos,
+                partida.getPuntos(),
+                partida.getAciertos(),
+                partida.getTotalPreguntas(),
+                false // Aquí podrías añadir lógica de si es la última pregunta
         );
     }
 
-    // --- Métodos Privados de Apoyo ---
+    // =====================================================
+    // CONSULTA DE PARTIDA
+    // =====================================================
 
-    private Jugador gestionarJugador(Long id, String nombre) {
-        if (id != null) {
-            return jugadorRepo.findById(id).orElseGet(() -> 
-                jugadorRepo.findByNombre(nombre).orElseGet(() -> crearNuevoJugador(nombre))
-            );
+    @Override
+    public PartidaResponse obtenerPartidaConPreguntas(Long partidaId) {
+        Partida partida = partidaRepo.findById(partidaId)
+                .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
+
+        List<Pregunta> preguntas = (List<Pregunta>) preguntaRepo.findAllById(partida.getPreguntaIds());
+
+        return new PartidaResponse(
+                partida.getId(),
+                partida.getJugador().getId(),
+                partida.getJugador().getNombre(),
+                partida.getAciertos(),
+                partida.getTotalPreguntas(),
+                preguntas.stream().map(PreguntaDTO::new).toList()
+        );
+    }
+
+    // =====================================================
+    // MÉTODOS PRIVADOS / AUXILIARES
+    // =====================================================
+
+    private void validarNombre(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del jugador no puede estar vacío");
         }
-        return jugadorRepo.findByNombre(nombre).orElseGet(() -> crearNuevoJugador(nombre));
+        if (nombre.length() > 50) {
+            throw new IllegalArgumentException("El nombre del jugador no puede exceder 50 caracteres");
+        }
     }
 
-    private Jugador crearNuevoJugador(String nombre) {
-        Jugador nuevo = new Jugador();
-        nuevo.setNombre(nombre);
-        return jugadorRepo.save(nuevo);
+    private Jugador gestionarJugador(Long jugadorId, String nombre) {
+        if (jugadorId != null) {
+            return jugadorRepo.findById(jugadorId)
+                    .orElseThrow(() -> new IllegalArgumentException("Jugador no encontrado"));
+        }
+        // Si no hay ID, buscamos por nombre para evitar duplicados, o creamos uno nuevo
+        return jugadorRepo.findByNombre(nombre)
+                .orElseGet(() -> jugadorRepo.save(new Jugador(nombre)));
     }
 
-    private List<Pregunta> obtenerPreguntasFiltradas(List<String> cats, List<Pregunta.TipoPregunta> tipos, int cant) {
+    private List<Pregunta.TipoPregunta> convertirTiposStringAEnum(List<String> tiposStr) {
+        if (tiposStr == null || tiposStr.isEmpty()) return List.of();
+        return tiposStr.stream()
+                .map(String::toUpperCase)
+                .map(Pregunta.TipoPregunta::valueOf)
+                .toList();
+    }
+
+    private List<Pregunta> obtenerPreguntasFiltradas(List<String> categorias, List<Pregunta.TipoPregunta> tipos, int cantidad) {
+        // Obtenemos todas y filtramos en memoria (Shuffle para aleatoriedad)
         List<Pregunta> pool = preguntaRepo.findAll().stream()
-                .filter(p -> cats == null || cats.isEmpty() || cats.contains(p.getCategoria()))
+                .filter(p -> categorias == null || categorias.isEmpty() || categorias.contains(p.getCategoria()))
                 .filter(p -> tipos == null || tipos.isEmpty() || tipos.contains(p.getTipo()))
-                .collect(java.util.stream.Collectors.toList());
-        
+                .collect(Collectors.toList());
+
         Collections.shuffle(pool);
-        return pool.stream().limit(cant).toList();
+        return pool.stream().limit(cantidad).toList();
     }
 }

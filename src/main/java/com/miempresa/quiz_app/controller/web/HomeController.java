@@ -20,7 +20,7 @@ public class HomeController {
 
 		model.addAttribute("categorias", opciones.categorias());
 		model.addAttribute("tipos", opciones.tipos());
-		model.addAttribute("cantidadMax", opciones.cantidadMaxima());
+		model.addAttribute("opcionesCantidad", opciones.opcionesCantidad());
 
 		return "home";
 	}
