@@ -16,12 +16,14 @@ public class Pregunta {
     private List<String> opciones;
     private List<String> respuestas;
     private List<String> respuestasCorrectas;
-
+    
     public enum TipoPregunta {
         VF, UNICA, MULTIPLE
     }
-
-    // Getters y Setters
+    
+    public Pregunta() {
+	}
+	// Getters y Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getEnunciado() { return enunciado; }

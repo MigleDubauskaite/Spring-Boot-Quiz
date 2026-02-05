@@ -22,7 +22,7 @@ public class HomeController {
 		model.addAttribute("tipos", opciones.tipos());
 		model.addAttribute("opcionesCantidad", opciones.opcionesCantidad());
 
-		return "home";
+		return "/pregunta-home/home";
 	}
 
 	@GetMapping("/error500-test")

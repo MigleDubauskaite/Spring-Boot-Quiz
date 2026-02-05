@@ -2,7 +2,7 @@ package com.miempresa.quiz_app.service.impl;
 
 import com.miempresa.quiz_app.dto.*;
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
-import com.miempresa.quiz_app.model.mysql.entity.Jugador;
+import com.miempresa.quiz_app.model.mysql.entity.Usuario;
 import com.miempresa.quiz_app.model.mysql.entity.Partida;
 import com.miempresa.quiz_app.repository.mongo.PreguntaRepository;
 import com.miempresa.quiz_app.repository.mysql.JugadorRepository;
@@ -67,7 +67,7 @@ public class JuegoServiceImpl implements JuegoService {
                 : 10;
 
         // Gestionar jugador (Recuperar o Crear)
-        Jugador jugador = gestionarJugador(jugadorId, nombre);
+        Usuario jugador = gestionarJugador(jugadorId, nombre);
 
         // Convertir filtros y obtener preguntas
         List<Pregunta.TipoPregunta> tipos = convertirTiposStringAEnum(tiposStr);
@@ -173,14 +173,16 @@ public class JuegoServiceImpl implements JuegoService {
         }
     }
 
-    private Jugador gestionarJugador(Long jugadorId, String nombre) {
+    private Usuario gestionarJugador(Long jugadorId, String nombre) {
+        // Si React nos manda un ID (porque el jugador ya estaba logueado o existe en la sesión)
         if (jugadorId != null) {
             return jugadorRepo.findById(jugadorId)
                     .orElseThrow(() -> new IllegalArgumentException("Jugador no encontrado"));
         }
-        // Si no hay ID, buscamos por nombre para evitar duplicados, o creamos uno nuevo
-        return jugadorRepo.findByNombre(nombre)
-                .orElseGet(() -> jugadorRepo.save(new Jugador(nombre)));
+        
+        // Si no hay ID, CREAMOS uno nuevo siempre, aunque el nombre coincida con otro
+        // Esto generará un nuevo ID auto-incremental en tu tabla MySQL
+        return jugadorRepo.save(new Usuario(nombre));
     }
 
     private List<Pregunta.TipoPregunta> convertirTiposStringAEnum(List<String> tiposStr) {

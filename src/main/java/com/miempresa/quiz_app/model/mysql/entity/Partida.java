@@ -17,7 +17,7 @@ public class Partida {
 
     @ManyToOne
     @JoinColumn(name = "jugador_id", nullable = false)
-    private Jugador jugador;
+    private Usuario jugador;
 
     private int totalPreguntas;
     private int aciertos;
@@ -50,8 +50,8 @@ public class Partida {
     // Getters y setters existentes...
     public Long getId() { return id; }
 
-    public Jugador getJugador() { return jugador; }
-    public void setJugador(Jugador jugador) { this.jugador = jugador; }
+    public Usuario getJugador() { return jugador; }
+    public void setJugador(Usuario jugador) { this.jugador = jugador; }
 
     public int getTotalPreguntas() { return totalPreguntas; }
     public void setTotalPreguntas(int totalPreguntas) { this.totalPreguntas = totalPreguntas; }

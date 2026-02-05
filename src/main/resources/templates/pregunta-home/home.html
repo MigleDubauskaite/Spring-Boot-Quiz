@@ -18,7 +18,7 @@
         Selecciona tus preferencias. Si no eliges nada, ¡mezclaremos todo por ti! 🎲
     </p>
 
-    <form th:action="@{/jugar}" method="get" class="p-4 rounded shadow-sm bg-white">
+    <form th:action="@{/jugar}" method="post" class="p-4 rounded shadow-sm bg-white">
         
         <div class="mb-5">
             <h5 class="text-center mb-3">1. Selecciona las Categorías</h5>
@@ -36,15 +36,17 @@
         <div class="mb-5">
             <h5 class="text-center mb-3">2. Tipos de Pregunta</h5>
             <div class="d-flex justify-content-center gap-2 flex-wrap">
+            
                 <div th:each="tipo : ${tipos}">
-                    <input type="checkbox" class="btn-check" name="tiposStr" 
-                           th:id="'tipo-' + ${tipo}" th:value="${tipo}" autocomplete="off">
-                    <label class="btn btn-outline-secondary px-4 py-2" th:for="'tipo-' + ${tipo}" 
-                           th:text="${tipo == T(com.miempresa.quiz_app.model.mongo.document.Pregunta.TipoPregunta).VF ? 'Verdadero / Falso' : 
-                                     (tipo == T(com.miempresa.quiz_app.model.mongo.document.Pregunta.TipoPregunta).UNICA ? 'Respuesta Única' : 'Respuesta Múltiple')}">
-                        Tipo
-                    </label>
-                </div>
+			    <input type="checkbox" class="btn-check" name="tiposStr" 
+			           th:id="'tipo-' + ${tipo}" th:value="${tipo}" autocomplete="off">
+			    <label class="btn btn-outline-secondary px-4 py-2" th:for="'tipo-' + ${tipo}" 
+			           th:text="${tipo.name() == 'VF' ? 'Verdadero / Falso' : 
+			                     (tipo.name() == 'UNICA' ? 'Respuesta Única' : 'Respuesta Múltiple')}">
+			        Tipo
+			    </label>
+			</div>
+			                
             </div>
         </div>
 

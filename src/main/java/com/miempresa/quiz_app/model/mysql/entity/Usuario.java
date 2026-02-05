@@ -1,38 +1,37 @@
 package com.miempresa.quiz_app.model.mysql.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
+@Table(name = "jugadores")
 public class Usuario {
 
-	@Id
-	private Long id;
-	private String nombre;
-	private String email;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public Long getId() {
-		return id;
-	}
+    @Column(nullable = false)
+    private String nombre;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // Relación con partidas: Un jugador tiene muchas partidas
+    // 'mappedBy' debe coincidir con el nombre del campo 'jugador' en la clase Partida
+    @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL)
+    private List<Partida> partidas;
 
-	public String getNombre() {
-		return nombre;
-	}
+    public Usuario() {}
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    public Usuario(String nombre) {
+        this.nombre = nombre;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
+    public List<Partida> getPartidas() { return partidas; }
+    public void setPartidas(List<Partida> partidas) { this.partidas = partidas; }
 }
