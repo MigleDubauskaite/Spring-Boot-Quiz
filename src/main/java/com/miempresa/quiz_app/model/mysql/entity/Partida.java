@@ -17,7 +17,7 @@ public class Partida {
 
     @ManyToOne
     @JoinColumn(name = "jugador_id", nullable = false)
-    private Usuario jugador;
+    private Jugador jugador;
 
     private int totalPreguntas;
     private int aciertos;
@@ -38,6 +38,9 @@ public class Partida {
     @CollectionTable(name = "partida_preguntas", joinColumns = @JoinColumn(name = "partida_id"))
     @Column(name = "pregunta_id")
     private List<String> preguntaIds;
+    
+    @Column(name = "preguntas_respondidas")
+    private int preguntasRespondidas = 0; 
 
     private LocalDateTime fecha;
 
@@ -47,11 +50,17 @@ public class Partida {
         this.aciertos = 0;
     }
 
-    // Getters y setters existentes...
+    public int getPreguntasRespondidas() {
+    	return preguntasRespondidas;
+    }
+    
+    public void setPreguntasRespondidas(int preguntasRespondidas) {
+    	this.preguntasRespondidas = preguntasRespondidas;
+    }
     public Long getId() { return id; }
 
-    public Usuario getJugador() { return jugador; }
-    public void setJugador(Usuario jugador) { this.jugador = jugador; }
+    public Jugador getJugador() { return jugador; }
+    public void setJugador(Jugador jugador) { this.jugador = jugador; }
 
     public int getTotalPreguntas() { return totalPreguntas; }
     public void setTotalPreguntas(int totalPreguntas) { this.totalPreguntas = totalPreguntas; }

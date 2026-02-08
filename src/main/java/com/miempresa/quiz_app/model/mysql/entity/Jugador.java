@@ -5,23 +5,26 @@ import java.util.List;
 
 @Entity
 @Table(name = "jugadores")
-public class Usuario {
+public class Jugador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nombre;
+    
+    @Column(nullable = false)
+    private String password;
 
     // Relación con partidas: Un jugador tiene muchas partidas
     // 'mappedBy' debe coincidir con el nombre del campo 'jugador' en la clase Partida
     @OneToMany(mappedBy = "jugador", cascade = CascadeType.ALL)
     private List<Partida> partidas;
 
-    public Usuario() {}
+    public Jugador() {}
 
-    public Usuario(String nombre) {
+    public Jugador(String nombre) {
         this.nombre = nombre;
     }
 
@@ -34,4 +37,13 @@ public class Usuario {
 
     public List<Partida> getPartidas() { return partidas; }
     public void setPartidas(List<Partida> partidas) { this.partidas = partidas; }
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+    
 }
