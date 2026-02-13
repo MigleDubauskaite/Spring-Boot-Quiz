@@ -33,7 +33,7 @@ public class PartidaServiceImpl implements PartidaService {
 
     @Override
     public List<Partida> obtenerPorJugador(Long jugadorId) {
-        return partidaRepository.findByJugadorId(jugadorId);
+        return partidaRepository.findByUsuarioId(jugadorId);
     }
 
     @Override

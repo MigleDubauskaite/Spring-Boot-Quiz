@@ -1,7 +1,7 @@
 package com.miempresa.quiz_app.service;
 
 import com.miempresa.quiz_app.dto.*;
-import com.miempresa.quiz_app.model.mysql.entity.Jugador;
+import com.miempresa.quiz_app.model.mysql.entity.Usuario;
 import java.util.List;
 
 public interface JuegoService {
@@ -14,7 +14,7 @@ public interface JuegoService {
     /**
      * Inicia una nueva partida para un jugador ya autenticado.
      */
-    PartidaResponse iniciarPartida(Jugador jugador, List<String> categorias, 
+    PartidaResponse iniciarPartida(Usuario jugador, List<String> categorias, 
                                   List<String> tiposStr, Integer cantidadSeleccionada);
 
     /**

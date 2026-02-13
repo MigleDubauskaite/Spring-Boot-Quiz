@@ -16,12 +16,12 @@ public class Partida {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "jugador_id", nullable = false)
-    private Jugador jugador;
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 
     private int totalPreguntas;
     private int aciertos;
-    private int puntos;                          // ← NUEVO: puntaje acumulado
+    private int puntos;     
 
     @ElementCollection
     @CollectionTable(name = "partida_categorias", joinColumns = @JoinColumn(name = "partida_id"))
@@ -34,7 +34,7 @@ public class Partida {
     @Column(name = "tipo")
     private List<Pregunta.TipoPregunta> tipos = new ArrayList<>();
 
-    @ElementCollection                           // ← NUEVO: IDs de preguntas de MongoDB
+    @ElementCollection                           // IDs de preguntas de MongoDB
     @CollectionTable(name = "partida_preguntas", joinColumns = @JoinColumn(name = "partida_id"))
     @Column(name = "pregunta_id")
     private List<String> preguntaIds;
@@ -59,8 +59,8 @@ public class Partida {
     }
     public Long getId() { return id; }
 
-    public Jugador getJugador() { return jugador; }
-    public void setJugador(Jugador jugador) { this.jugador = jugador; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
     public int getTotalPreguntas() { return totalPreguntas; }
     public void setTotalPreguntas(int totalPreguntas) { this.totalPreguntas = totalPreguntas; }
@@ -77,7 +77,6 @@ public class Partida {
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
-    // Nuevos getters y setters
     public int getPuntos() { return puntos; }
     public void setPuntos(int puntos) { this.puntos = puntos; }
 

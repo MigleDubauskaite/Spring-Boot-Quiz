@@ -2,7 +2,7 @@ package com.miempresa.quiz_app.service.impl;
 
 import com.miempresa.quiz_app.dto.*;
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
-import com.miempresa.quiz_app.model.mysql.entity.Jugador;
+import com.miempresa.quiz_app.model.mysql.entity.Usuario;
 import com.miempresa.quiz_app.model.mysql.entity.Partida;
 import com.miempresa.quiz_app.repository.mongo.PreguntaRepository;
 import com.miempresa.quiz_app.repository.mysql.PartidaRepository;
@@ -48,7 +48,7 @@ public class JuegoServiceImpl implements JuegoService {
 
     @Override
     @Transactional
-    public PartidaResponse iniciarPartida(Jugador jugador, List<String> categorias, 
+    public PartidaResponse iniciarPartida(Usuario jugador, List<String> categorias, 
                                          List<String> tiposStr, Integer cantidadSeleccionada) {
 
         // 1. Lógica de negocio: Cantidad de preguntas
@@ -67,7 +67,7 @@ public class JuegoServiceImpl implements JuegoService {
 
         // 3. Crear y guardar Entidad Partida en MySQL
         Partida partida = new Partida();
-        partida.setJugador(jugador);
+        partida.setUsuario(jugador);
         partida.setTotalPreguntas(preguntas.size());
         partida.setCategorias(categorias);
         partida.setTipos(tipos);
@@ -150,8 +150,8 @@ public class JuegoServiceImpl implements JuegoService {
 
         return new PartidaResponse(
                 partida.getId(),
-                partida.getJugador().getId(),
-                partida.getJugador().getNombre(),
+                partida.getUsuario().getId(),
+                partida.getUsuario().getNombre(),
                 partida.getAciertos(),
                 partida.getTotalPreguntas(),
                 preguntas.stream().map(PreguntaDTO::new).toList()
