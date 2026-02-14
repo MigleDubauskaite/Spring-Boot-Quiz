@@ -44,20 +44,23 @@ public class SecurityConfig {
             
             // 3. Reglas de acceso
             .authorizeHttpRequests(auth -> auth
-                // Permitir login y registro a todos
+                // 1. Recursos públicos (Thymeleaf, estáticos y API de Auth)
+                .requestMatchers("/", "/home", "/jugar", "/css/**", "/js/**", "/img/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 
-                // --- Seguridad para MongoDB (Preguntas) ---
-                // Solo los ADMIN pueden crear, editar o borrar
-                .requestMatchers(HttpMethod.POST, "/api/preguntas/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/preguntas/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/preguntas/**").hasRole("ADMIN")
+                // 2. --- Seguridad para MongoDB (Preguntas) ---
+                // El GET es necesario para que el Admin vea la lista y el Usuario pueda jugar
+                .requestMatchers(HttpMethod.GET, "/api/preguntas/**").hasAnyRole("USER", "ADMIN")
                 
-                // --- Seguridad para el Juego ---
+                // Solo los ADMIN pueden modificar la base de datos (POST, PUT, DELETE)
+                // Al usar solo /api/preguntas/** sin especificar método, bloqueamos el resto para Admin
+                .requestMatchers("/api/preguntas/**").hasRole("ADMIN")
+                
+                // 3. --- Seguridad para el Juego ---
                 // Usuarios y Admins pueden jugar
                 .requestMatchers("/api/juego/**").hasAnyRole("USER", "ADMIN")
                 
-                // Cualquier otra ruta requiere estar autenticado
+                // 4. Cualquier otra ruta requiere estar autenticado
                 .anyRequest().authenticated()
             )
             

@@ -47,14 +47,17 @@ public class JwtFilter extends OncePerRequestFilter {
 						.getBody(); //// 3. Sacas el CONTENIDO (los Claims)
 
 				String username = claims.getSubject();
-				String rol = (String) claims.get("rol"); // Ej: ROLE_ADMIN
+
+				String rol = (String) claims.get("rol"); 
 
 				if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+				    // Si por algún motivo el rol es nulo, le asignamos ROLE_USER por defecto para que no explote
+				    String finalRol = (rol != null) ? rol : "ROLE_USER";
 
-					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-							username, null, List.of(new SimpleGrantedAuthority(rol)));
+				    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+				            username, null, List.of(new SimpleGrantedAuthority(finalRol)));
 
-					SecurityContextHolder.getContext().setAuthentication(authentication);
+				    SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
 
 			} catch (Exception e) {

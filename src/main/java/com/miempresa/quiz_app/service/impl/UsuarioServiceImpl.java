@@ -29,43 +29,40 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public LoginResponse autenticar(String nombre, String password) {
-        // 1. Buscamos al usuario
         Usuario usuario = jugadorRepo.findByNombre(nombre)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe."));
 
-        // 2. Comparamos contraseña
         if (!passwordEncoder.matches(password, usuario.getPassword())) {
             throw new IllegalArgumentException("Contraseña incorrecta.");
         }
 
-        // 3. Generamos el Token JWT (El "Carnet" que viaja a React)
+        // Concatenamos "ROLE_" para que sea compatible con .hasRole() y tu JwtFilter
+        String rolConPrefijo = "ROLE_" + usuario.getRol().name(); 
+
         String token = Jwts.builder()
                 .setSubject(usuario.getNombre())
-                .claim("rol", usuario.getRol().name()) // Ej: ROLE_USER o ROLE_ADMIN
+                .claim("rol", rolConPrefijo) 
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // Expira en 1 hora
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // expira en una hora
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        // 4. Retornamos el DTO con toda la info necesaria para el Frontend
-        return new LoginResponse(token, usuario.getNombre(), usuario.getRol().name());
+        return new LoginResponse(token, usuario.getNombre(), rolConPrefijo);
     }
 
     @Override
     @Transactional
     public Usuario registrar(String nombre, String password) {
         if (jugadorRepo.findByNombre(nombre).isPresent()) {
-            throw new IllegalArgumentException("Ese nombre de jugador ya está en uso.");
+            throw new IllegalArgumentException("El nombre de usuario ya existe.");
         }
-
+        
         validarFormato(nombre, password);
-
+        
         Usuario nuevo = new Usuario();
         nuevo.setNombre(nombre);
         nuevo.setPassword(passwordEncoder.encode(password));
-        
-        // Por defecto, asignamos ROLE_USER (asegúrate de tener este campo en tu Entity)
-        // nuevo.setRol(Rol.ROLE_USER); 
+        nuevo.setRol(Usuario.Rol.USER); // Asignamos USER por defecto
 
         return jugadorRepo.save(nuevo);
     }
