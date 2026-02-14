@@ -45,7 +45,7 @@ public class SecurityConfig {
             // 3. Reglas de acceso
             .authorizeHttpRequests(auth -> auth
                 // 1. Recursos públicos (Thymeleaf, estáticos y API de Auth)
-                .requestMatchers("/", "/home", "/jugar", "/css/**", "/js/**", "/img/**").permitAll()
+                .requestMatchers("/", "/home", "/jugar", "/categorias", "/acerca", "/css/**", "/js/**", "/img/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 
                 // 2. --- Seguridad para MongoDB (Preguntas) ---

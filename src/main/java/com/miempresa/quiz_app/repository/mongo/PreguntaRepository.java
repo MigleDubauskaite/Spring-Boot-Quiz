@@ -16,4 +16,5 @@ public interface PreguntaRepository extends MongoRepository<Pregunta, String> {
     
     @Query(value = "{}", fields = "{ 'categoria' : 1 }")
     List<Pregunta> findCategorias();
+    
 }

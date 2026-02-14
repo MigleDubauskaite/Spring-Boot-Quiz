@@ -3,6 +3,8 @@ package com.miempresa.quiz_app.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.miempresa.quiz_app.model.mongo.document.Pregunta;
 
 public interface PreguntaService {
@@ -18,4 +20,6 @@ public interface PreguntaService {
     Pregunta guardarPregunta(Pregunta pregunta);
 
     void eliminarPregunta(String id);
+    
+    public List<Pregunta> importarDesdeArchivo(MultipartFile archivo) ;
 }

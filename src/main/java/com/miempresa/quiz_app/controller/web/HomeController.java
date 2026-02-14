@@ -13,16 +13,26 @@ public class HomeController {
 	@Autowired
 	private JuegoService juegoService;
 
-	@GetMapping("/")
+	@GetMapping({ "/", "/home" })
 	public String mostrarHome(Model model) {
-		// Obtener opciones disponibles para mostrar en el formulario
 		OpcionesQuizDTO opciones = juegoService.obtenerOpcionesDisponibles();
-
+		model.addAttribute("mensaje", "Prepárate para el Reto");
 		model.addAttribute("categorias", opciones.categorias());
 		model.addAttribute("tipos", opciones.tipos());
 		model.addAttribute("opcionesCantidad", opciones.opcionesCantidad());
+		return "pregunta-home/home";
+	}
 
-		return "/pregunta-home/home";
+	@GetMapping("/categorias")
+	public String categorias(Model model) {
+		OpcionesQuizDTO opciones = juegoService.obtenerOpcionesDisponibles();
+		model.addAttribute("categorias", opciones.categorias());
+		return "pages/categorias";
+	}
+
+	@GetMapping("/acerca")
+	public String acerca() {
+		return "pages/acerca";
 	}
 
 	@GetMapping("/error500-test")
