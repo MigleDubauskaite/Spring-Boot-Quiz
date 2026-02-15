@@ -28,6 +28,8 @@ public class JuegoRestController {
     @PostMapping("/iniciar")
     public ResponseEntity<?> iniciarPartida(@RequestBody JuegoRequest request) {
         try {
+        	System.out.println("DEBUG: JSON recibido - Cantidad: " + request.cantidad());
+            System.out.println("DEBUG: JSON recibido - Categorías: " + request.categorias());
             // 1. SACAR AL USUARIO DEL CONTEXTO DE SEGURIDAD
             // Gracias al JwtFilter, el usuario ya está autenticado aquí.
             String username = SecurityContextHolder.getContext().getAuthentication().getName();

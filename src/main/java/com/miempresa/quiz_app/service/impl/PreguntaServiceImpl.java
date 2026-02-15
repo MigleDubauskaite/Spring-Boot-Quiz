@@ -7,9 +7,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,16 @@ public class PreguntaServiceImpl implements PreguntaService {
 
 	public void eliminarPregunta(String id) {
 		repositorio.deleteById(id);
+	}
+	
+	@Override
+	public Page<Pregunta> obtenerTodasPaginadas(String enunciado, String categoria, String tipo, Pageable pageable) {
+	    // Si los filtros son null, los convertimos en "" para que la búsqueda no falle
+	    String e = (enunciado == null) ? "" : enunciado;
+	    String c = (categoria == null) ? "" : categoria;
+	    String t = (tipo == null) ? "" : tipo;
+
+	    return repositorio.findByEnunciadoContainingIgnoreCaseAndCategoriaContainingAndTipoContaining(e, c, t, pageable);
 	}
 	
 	public List<Pregunta> importarDesdeArchivo(MultipartFile archivo) {

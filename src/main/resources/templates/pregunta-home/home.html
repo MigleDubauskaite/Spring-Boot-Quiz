@@ -63,7 +63,7 @@
             </h2>
             <div class="quantity-grid">
                 <div th:each="cant : ${opcionesCantidad}" class="quantity-item">
-                    <input type="radio" class="btn-check" name="cantidadSeleccionada"
+                    <input type="radio" class="btn-check" name="cantidad"
                            th:id="'cant-' + ${cant}" th:value="${cant}"
                            th:checked="${cant == 10}" autocomplete="off">
                     <label class="btn btn-circle" th:for="'cant-' + ${cant}">

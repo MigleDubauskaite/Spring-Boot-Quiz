@@ -88,39 +88,3 @@ main .btn-primary:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Navbar acorde al resto de la app */
-.navbar {
-    background-color: rgba(8, 131, 149, 0.2) !important;
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(156, 207, 255, 0.1);
-}
-
-.navbar-brand {
-    font-weight: 800;
-    color: var(--sky) !important;
-}
-
-.nav-link {
-    font-weight: 600;
-    color: white !important;
-    opacity: 0.7;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    opacity: 1;
-    color: var(--coral) !important;
-}
-
-/* Footer */
-footer hr {
-    border-top: 1px solid rgba(156, 207, 255, 0.1);
-    margin: 40px 0 20px 0;
-}
-
-footer p {
-    color: var(--sky);
-    opacity: 0.5;
-    font-size: 0.85rem;
-    text-align: center;
-}

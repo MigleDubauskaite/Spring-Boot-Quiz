@@ -4,6 +4,10 @@ import com.miempresa.quiz_app.model.mongo.document.Pregunta;
 import com.miempresa.quiz_app.service.PreguntaService;
 import com.miempresa.quiz_app.service.impl.PreguntaServiceImpl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +30,19 @@ public class PreguntaController {
     @PostMapping("/importar")
     public List<Pregunta> importarPreguntas(@RequestParam("archivo") MultipartFile archivo) {
         return preguntaService.importarDesdeArchivo(archivo);
+    }
+    
+    @GetMapping("/paginado")
+    public Page<Pregunta> obtenerPaginadas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String enunciado,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String tipo) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        
+        return preguntaService.obtenerTodasPaginadas(enunciado, categoria, tipo, pageable);
     }
     
     // Obtener todas las preguntas
