@@ -16,34 +16,35 @@ import java.util.Date;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-    private final UsuarioRepository jugadorRepo;
+    private final UsuarioRepository usuarioRepo;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret}")
     private String secretKey;
 
     public UsuarioServiceImpl(UsuarioRepository jugadorRepo, BCryptPasswordEncoder passwordEncoder) {
-        this.jugadorRepo = jugadorRepo;
+        this.usuarioRepo = jugadorRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public LoginResponse autenticar(String nombre, String password) {
-        Usuario usuario = jugadorRepo.findByNombre(nombre)
+        Usuario usuario = usuarioRepo.findByNombre(nombre)
                 .orElseThrow(() -> new IllegalArgumentException("El usuario no existe."));
 
         if (!passwordEncoder.matches(password, usuario.getPassword())) {
             throw new IllegalArgumentException("Contraseña incorrecta.");
         }
-
-        // Concatenamos "ROLE_" para que sea compatible con .hasRole() y tu JwtFilter
+        
+        // Prefijo vital para Spring Security y React
+     // Concatenamos "ROLE_" para que sea compatible con .hasRole() y tu JwtFilter
         String rolConPrefijo = "ROLE_" + usuario.getRol().name(); 
 
         String token = Jwts.builder()
                 .setSubject(usuario.getNombre())
                 .claim("rol", rolConPrefijo) 
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // expira en una hora
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000))//expira en 1 hora
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
@@ -53,23 +54,22 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public Usuario registrar(String nombre, String password) {
-        if (jugadorRepo.findByNombre(nombre).isPresent()) {
+        if (usuarioRepo.findByNombre(nombre).isPresent()) {
             throw new IllegalArgumentException("El nombre de usuario ya existe.");
         }
         
         validarFormato(nombre, password);
-        
         Usuario nuevo = new Usuario();
         nuevo.setNombre(nombre);
         nuevo.setPassword(passwordEncoder.encode(password));
-        nuevo.setRol(Usuario.Rol.USER); // Asignamos USER por defecto
+        nuevo.setRol(Usuario.Rol.USER); // Asignación por defecto
 
-        return jugadorRepo.save(nuevo);
+        return usuarioRepo.save(nuevo);
     }
 
     @Override
     public Usuario buscarPorNombre(String nombre) {
-        return jugadorRepo.findByNombre(nombre)
+        return usuarioRepo.findByNombre(nombre)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
     }
 
@@ -92,5 +92,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (password == null || password.length() < 6) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres.");
         }
+    }
+    
+    @Override
+    public boolean existePorNombre(String nombre) {
+        // Esto asume que tienes un UsuarioRepository inyectado
+        return usuarioRepo.existsByNombre(nombre);
     }
 }

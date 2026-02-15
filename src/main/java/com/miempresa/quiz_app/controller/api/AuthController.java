@@ -37,4 +37,9 @@ public class AuthController {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
+    
+    @GetMapping("/exists/{nombre}")
+    public ResponseEntity<Boolean> comprobarExistencia(@PathVariable String nombre) {
+        return ResponseEntity.ok(usuarioService.existePorNombre(nombre));
+    }
 }

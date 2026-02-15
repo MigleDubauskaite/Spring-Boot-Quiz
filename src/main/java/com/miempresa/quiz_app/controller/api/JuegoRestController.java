@@ -4,6 +4,9 @@ import com.miempresa.quiz_app.dto.*;
 import com.miempresa.quiz_app.model.mysql.entity.Usuario;
 import com.miempresa.quiz_app.service.JuegoService;
 import com.miempresa.quiz_app.service.UsuarioService;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,4 +70,26 @@ public class JuegoRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar la respuesta.");
         }
     }
+    
+ // --- NUEVO ENDPOINT PARA EL HISTORIAL ---
+    @GetMapping("/historial")
+    public ResponseEntity<List<HistorialDTO>> obtenerHistorial() {
+        try {
+            // 1. Obtenemos el nombre del usuario desde el Token (SecurityContext)
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            
+            // 2. Buscamos al usuario en la base de datos
+            Usuario jugador = usuarioService.buscarPorNombre(username); 
+
+            // 3. Llamamos al servicio para obtener los datos optimizados
+            List<HistorialDTO> historial = juegoService.obtenerHistorialPorJugador(jugador.getId());
+
+            return ResponseEntity.ok(historial);
+        } catch (Exception e) {
+            // Es buena práctica registrar el error o enviar un mensaje para depurar
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    
 }

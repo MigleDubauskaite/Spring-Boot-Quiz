@@ -26,4 +26,8 @@ public interface JuegoService {
      * Recupera una partida con sus preguntas completas (para reconexión o vista final).
      */
     PartidaResponse obtenerPartidaConPreguntas(Long partidaId);
+    
+    List<HistorialDTO> obtenerHistorialPorJugador(Long usuarioId);
+    
+    
 }

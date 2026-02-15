@@ -10,6 +10,7 @@ import com.miempresa.quiz_app.service.JuegoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,10 +28,9 @@ public class JuegoServiceImpl implements JuegoService {
     // =====================================================
     // OPCIONES DEL QUIZ
     // =====================================================
-
     @Override
     public OpcionesQuizDTO obtenerOpcionesDisponibles() {
-        List<String> categorias = preguntaRepo.findCategorias().stream()
+        List<String> categorias = preguntaRepo.findAll().stream()
                 .map(Pregunta::getCategoria)
                 .filter(Objects::nonNull)
                 .distinct()
@@ -45,19 +45,15 @@ public class JuegoServiceImpl implements JuegoService {
     // =====================================================
     // INICIO DE PARTIDA
     // =====================================================
-
     @Override
     @Transactional
     public PartidaResponse iniciarPartida(Usuario jugador, List<String> categorias, 
                                          List<String> tiposStr, Integer cantidadSeleccionada) {
 
-        // 1. Lógica de negocio: Cantidad de preguntas
         List<Integer> opcionesPermitidas = List.of(10, 15, 20);
         int cantidadFinal = (cantidadSeleccionada != null && opcionesPermitidas.contains(cantidadSeleccionada))
-                ? cantidadSeleccionada
-                : 10;
+                ? cantidadSeleccionada : 10;
 
-        // 2. Convertir filtros y obtener preguntas de MongoDB
         List<Pregunta.TipoPregunta> tipos = convertirTiposStringAEnum(tiposStr);
         List<Pregunta> preguntas = obtenerPreguntasFiltradas(categorias, tipos, cantidadFinal);
 
@@ -65,11 +61,17 @@ public class JuegoServiceImpl implements JuegoService {
             throw new RuntimeException("No hay preguntas disponibles para los filtros seleccionados.");
         }
 
-        // 3. Crear y guardar Entidad Partida en MySQL
         Partida partida = new Partida();
         partida.setUsuario(jugador);
         partida.setTotalPreguntas(preguntas.size());
-        partida.setCategorias(categorias);
+        
+        // Si no se eligen categorías, guardamos las que realmente salieron en el sorteo
+        if (categorias == null || categorias.isEmpty()) {
+            partida.setCategorias(preguntas.stream().map(Pregunta::getCategoria).distinct().toList());
+        } else {
+            partida.setCategorias(categorias);
+        }
+
         partida.setTipos(tipos);
         partida.setAciertos(0);
         partida.setPuntos(0);
@@ -77,60 +79,51 @@ public class JuegoServiceImpl implements JuegoService {
 
         partidaRepo.save(partida);
 
-        // 4. Retornar respuesta mapeada al DTO
         return new PartidaResponse(
                 partida.getId(),
                 jugador.getId(),
                 jugador.getNombre(),
                 partida.getAciertos(),
                 partida.getTotalPreguntas(),
-                preguntas.stream().map(PreguntaDTO::new).toList()
+                prepararPreguntasParaFront(preguntas)
         );
     }
 
     // =====================================================
     // REGISTRO DE RESPUESTAS
     // =====================================================
-
     @Override
     @Transactional
     public RespuestaResultadoDTO registrarRespuesta(Long partidaId, String preguntaId, List<String> respuestasUsuario) {
 
-        // 1. Recuperar la partida y la pregunta
         Partida partida = partidaRepo.findById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
-
         Pregunta pregunta = preguntaRepo.findById(preguntaId)
                 .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
 
-        // 2. Lógica de corrección
         List<String> correctas = pregunta.getRespuestasCorrectas();
         boolean esCorrecta = correctas.size() == respuestasUsuario.size() &&
                              new HashSet<>(correctas).equals(new HashSet<>(respuestasUsuario));
 
-        // 3. ACTUALIZAR ESTADO DE LA PARTIDA
-        // Sumamos una respuesta intentada (sea acierto o fallo)
+        // Actualizamos progreso
         partida.setPreguntasRespondidas(partida.getPreguntasRespondidas() + 1);
 
-        int puntosObtenidos = 0;
         if (esCorrecta) {
-            puntosObtenidos = 10;
             partida.setAciertos(partida.getAciertos() + 1);
-            partida.setPuntos(partida.getPuntos() + puntosObtenidos);
         }
 
-        // 4. Calcular si hemos llegado al final
-        boolean terminada = partida.getPreguntasRespondidas() >= partida.getTotalPreguntas();
+        // Calculamos nota normalizada (0-100)
+        int puntosNormalizados = calcularPuntajeNormalizado(partida.getAciertos(), partida.getTotalPreguntas());
+        partida.setPuntos(puntosNormalizados);
 
-        // 5. Persistir cambios
+        boolean terminada = partida.getPreguntasRespondidas() >= partida.getTotalPreguntas();
         partidaRepo.save(partida);
 
-        // 6. Retornar el DTO con la verdad absoluta del servidor
         return new RespuestaResultadoDTO(
                 esCorrecta,
                 correctas,
-                puntosObtenidos,
-                partida.getPuntos(),
+                esCorrecta ? 10 : 0, // Valor simbólico de la pregunta actual
+                partida.getPuntos(), // Nota sobre 100
                 partida.getAciertos(),
                 partida.getTotalPreguntas(),
                 terminada
@@ -138,8 +131,26 @@ public class JuegoServiceImpl implements JuegoService {
     }
 
     // =====================================================
-    // CONSULTA DE PARTIDA
+    // CONSULTAS (HISTORIAL Y DETALLE)
     // =====================================================
+    @Override
+    public List<HistorialDTO> obtenerHistorialPorJugador(Long usuarioId) {
+        List<Partida> partidas = partidaRepo.findByUsuarioIdOrderByIdDesc(usuarioId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        return partidas.stream()
+                // Solo mostramos partidas que se han completado
+                .filter(p -> p.getPreguntasRespondidas() >= p.getTotalPreguntas())
+                .map(p -> new HistorialDTO(
+                        p.getId(),
+                        p.getFecha() != null ? p.getFecha().format(formatter) : "Reciente",
+                        (p.getCategorias() != null && !p.getCategorias().isEmpty()) 
+                                ? String.join(", ", p.getCategorias()) : "Multitemática",
+                        p.getPuntos(),
+                        p.getTotalPreguntas(),
+                        p.getAciertos()
+                )).collect(Collectors.toList());
+    }
 
     @Override
     public PartidaResponse obtenerPartidaConPreguntas(Long partidaId) {
@@ -154,13 +165,34 @@ public class JuegoServiceImpl implements JuegoService {
                 partida.getUsuario().getNombre(),
                 partida.getAciertos(),
                 partida.getTotalPreguntas(),
-                preguntas.stream().map(PreguntaDTO::new).toList()
+                prepararPreguntasParaFront(preguntas)
         );
     }
 
     // =====================================================
-    // MÉTODOS PRIVADOS AUXILIARES
+    // MÉTODOS PRIVADOS AUXILIARES (Lógica de Negocio)
     // =====================================================
+
+    private List<PreguntaDTO> prepararPreguntasParaFront(List<Pregunta> preguntas) {
+        return preguntas.stream().map(p -> {
+            // Mezclamos las opciones aquí para que el DTO sea puro
+            List<String> opcionesMezcladas = new ArrayList<>(p.getOpciones());
+            Collections.shuffle(opcionesMezcladas);
+
+            return new PreguntaDTO(
+                    p.getId(),
+                    p.getEnunciado(),
+                    p.getTipo(),
+                    p.getCategoria(),
+                    opcionesMezcladas
+            );
+        }).toList();
+    }
+
+    private int calcularPuntajeNormalizado(int aciertos, int total) {
+        if (total <= 0) return 0;
+        return (int) Math.round(((double) aciertos / total) * 100);
+    }
 
     private List<Pregunta.TipoPregunta> convertirTiposStringAEnum(List<String> tiposStr) {
         if (tiposStr == null || tiposStr.isEmpty()) return List.of();

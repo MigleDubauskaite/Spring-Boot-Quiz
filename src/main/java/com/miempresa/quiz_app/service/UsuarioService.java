@@ -16,4 +16,6 @@ public interface UsuarioService {
     
     // Tu login antiguo (opcional, por si lo usas en otro sitio)
     Usuario login(String nombre, String password);
+    
+    boolean existePorNombre(String nombre);
 }
